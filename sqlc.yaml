@@ -1,0 +1,84 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "queries"
+    schema: "migrations"
+    gen:
+      go:
+        package: "gen"
+        out: "internal/gen"
+        sql_package: "pgx/v5"
+
+        # Don't use database/sql Null* types (NullString, NullBool, etc.).
+        emit_pointers_for_null_types: true
+
+        # Don't do any tricky modifications to struct names (pluralize, etc.).
+        emit_exact_table_names: true
+
+        # Sometimes it's useful to have json tags and expose the DB struct directly.
+        emit_json_tags: true
+        json_tags_case_style: "camel"
+
+        # Use []T{} instead of nil for empty slices.
+        emit_empty_slices: true
+
+        overrides:
+          # Just use int instead of int64 or int32.
+          - db_type: "bigserial"
+            go_type: "int"
+          - db_type: "bigserial"
+            nullable: true
+            go_type:
+              type: "int"
+              pointer: true
+          - db_type: "bigint"
+            go_type: "int"
+          - db_type: "bigint"
+            nullable: true
+            go_type:
+              type: "int"
+              pointer: true
+          - db_type: "serial"
+            go_type: "int"
+          - db_type: "serial"
+            nullable: true
+            go_type:
+              type: "int"
+              pointer: true
+          - db_type: "integer"
+            go_type: "int"
+          - db_type: "integer"
+            nullable: true
+            go_type:
+              type: "int"
+              pointer: true
+
+          # Use uuid.UUID instead of DB type.
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "uuid"
+            nullable: true
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+              pointer: true
+
+          # Use time.Time instead of DB type.
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "timestamptz"
+            nullable: true
+            go_type:
+              import: "time"
+              type: "Time"
+              pointer: true
+
+          # Use go-geom types instead of DB type for PostGIS.
+          - db_type: "geometry"
+            go_type: "github.com/twpayne/go-geom.Point"
+          - db_type: "geometry"
+            nullable: true
+            go_type:
+              import: "github.com/twpayne/go-geom"
+              type: "Point"
+              pointer: true

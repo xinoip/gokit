@@ -1,0 +1,37 @@
+module github.com/xinoip/gokit
+
+go 1.26.4
+
+require (
+	github.com/danielgtaylor/huma/v2 v2.38.0
+	github.com/go-chi/chi/v5 v5.3.0
+	github.com/go-chi/cors v1.2.2
+	github.com/go-chi/httplog/v3 v3.4.0
+	github.com/go-chi/httprate v0.15.0
+	github.com/jackc/pgx/v5 v5.9.2
+	github.com/peterldowns/pgtestdb v0.1.1
+	github.com/peterldowns/pgtestdb/migrators/goosemigrator v0.1.1
+	github.com/pressly/goose/v3 v3.27.1
+	github.com/redis/go-redis/v9 v9.20.1
+	github.com/stretchr/testify v1.11.1
+)
+
+require (
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
+	github.com/kr/text v0.1.0 // indirect
+	github.com/mfridman/interpolate v0.0.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/sethvargo/go-retry v0.3.0 // indirect
+	github.com/zeebo/xxh3 v1.1.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)

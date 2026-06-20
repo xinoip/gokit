@@ -1,0 +1,106 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - depguard
+    - wrapcheck
+    - varnamelen
+    - nlreturn
+    - wsl
+    - wsl_v5
+    - godox
+    - err113
+
+  settings:
+    gomoddirectives:
+      replace-local: true # The example module intentionally replaces gokit with ../.
+    mnd:
+      ignored-numbers:
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "16",
+          "32",
+          "64",
+        ]
+    errcheck:
+      exclude-functions:
+        - crypto/rand.Read # This only returns an error if the system's RNG fails.
+    gosec:
+      config:
+        G104:
+          rand:
+            - Read
+    cyclop:
+      max-complexity: 15
+    exhaustruct:
+      exclude:
+        - ^net/http.Client$
+        - ^net/http.Cookie$
+        - ^net/http.Request$
+        - ^net/http.Response$
+        - ^net/http.Server$
+        - ^net/http.Transport$
+        - ^net/url.URL$
+        - ^os/exec.Cmd$
+        - ^reflect.StructField$
+        - ^testing/fstest.MapFile$
+        - ^redis.Options$
+        - ^github\.com/redis/go-redis/v9\.Options$
+        - ^github\.com/spf13/cobra\.Command$
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: package-comments
+          disabled: true
+        - name: exported
+          disabled: true
+        - name: line-length-limit
+          disabled: false
+          arguments: [120]
+        - name: add-constant
+          disabled: true
+        - name: cyclomatic
+          disabled: true
+        - name: unhandled-error
+          disabled: true
+        - name: cognitive-complexity
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        # - name: package-naming
+        #   disabled: false
+        - name: blank-imports
+          disabled: true
+        - name: function-length
+          disabled: true
+    funlen:
+      lines: 120
+
+  exclusions:
+    rules:
+      - path: '_test\.go'
+        linters:
+          - funlen
+          - unqueryvet
+          - gosec
+          - revive
+
+formatters:
+  enable:
+    - gofmt
+    - golines
+    - goimports
+
+  settings:
+    golines:
+      max-len: 120

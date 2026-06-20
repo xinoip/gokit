@@ -1,0 +1,77 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+
+	"example/internal/gen"
+	handlersv1 "example/internal/handlers/v1"
+	"example/internal/notes"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
+	"github.com/xinoip/gokit/api"
+	"github.com/xinoip/gokit/mux"
+	"github.com/xinoip/gokit/server"
+)
+
+func serve(ctx context.Context, c *Config) error {
+	r := mux.NewChi(&mux.NewChiParams{
+		AllowOrigins: []string{"https://*"},
+	})
+
+	pgdb, err := pgxpool.New(ctx, c.PostgresConnURL)
+	if err != nil {
+		return fmt.Errorf("failed to connect to postgres: %w", err)
+	}
+	defer pgdb.Close()
+
+	err = pgdb.Ping(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to ping postgres: %w", err)
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr: c.RedisConnURL,
+	})
+	defer func() {
+		err := rdb.Close()
+		if err != nil {
+			slog.Warn("Failed to close redis client", "err", err)
+		}
+	}()
+
+	err = rdb.Ping(ctx).Err()
+	if err != nil {
+		return fmt.Errorf("failed to ping redis: %w", err)
+	}
+
+	noteStore := notes.NewPostgresStore(gen.New(pgdb))
+	noteCache := notes.NewRedisCache(rdb)
+	apir := api.NewRegistry(&api.NewRegistryParams{
+		Mux:     r,
+		Title:   "Notes API",
+		Version: "v0.0.1",
+		SecureMiddlewareMaker: func(_ huma.API) api.Middleware {
+			return func(ctx huma.Context, next func(huma.Context)) {
+				next(ctx)
+			}
+		},
+	})
+
+	v1Handlers := handlersv1.Handlers{
+		CreateNoteCommandHandler: notes.NewCreateCommandHandler(noteStore, noteCache),
+		UpdateNoteCommandHandler: notes.NewUpdateCommandHandler(noteStore, noteCache),
+		DeleteNoteCommandHandler: notes.NewDeleteCommandHandler(noteStore, noteCache),
+		ListNotesQueryHandler:    notes.NewListQueryHandler(noteStore),
+		GetNoteQueryHandler:      notes.NewGetQueryHandler(noteStore, noteCache),
+	}
+	v1Handlers.Register(apir)
+
+	return server.ServeHTTP(ctx, &server.ServeHTTPParams{
+		Addr:    c.ServeAddr,
+		Handler: r,
+	})
+}
