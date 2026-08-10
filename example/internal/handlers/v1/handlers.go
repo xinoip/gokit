@@ -7,17 +7,19 @@ import (
 )
 
 type Handlers struct {
-	CreateNoteCommandHandler *notes.CreateCommandHandler
-	UpdateNoteCommandHandler *notes.UpdateCommandHandler
-	DeleteNoteCommandHandler *notes.DeleteCommandHandler
-	ListNotesQueryHandler    *notes.ListQueryHandler
-	GetNoteQueryHandler      *notes.GetQueryHandler
+	RPCNotes *notes.RPC
+}
+
+func NewHandlers(rpc *notes.RPC) *Handlers {
+	return &Handlers{
+		RPCNotes: rpc,
+	}
 }
 
 func (h *Handlers) Register(r *api.Registry) {
-	api.Get(r, "/v1/notes", h.listNotes, "list-notes", api.WithInsecure())
-	api.Post(r, "/v1/notes", h.createNote, "create-note", api.WithInsecure())
-	api.Get(r, "/v1/notes/{note-id}", h.getNote, "get-note", api.WithInsecure())
-	api.Put(r, "/v1/notes/{note-id}", h.updateNote, "update-note", api.WithInsecure())
-	api.Delete(r, "/v1/notes/{note-id}", h.deleteNote, "delete-note", api.WithInsecure())
+	api.RPC(r, h.RPCNotes.List, "list_notes", api.WithInsecure())
+	api.RPC(r, h.RPCNotes.Create, "create_note", api.WithInsecure())
+	api.RPC(r, h.RPCNotes.Get, "get_note", api.WithInsecure())
+	api.RPC(r, h.RPCNotes.Update, "update_note", api.WithInsecure())
+	api.RPC(r, h.RPCNotes.Delete, "delete_note", api.WithInsecure())
 }

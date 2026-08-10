@@ -2,11 +2,14 @@ package notes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"example/internal/gen"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/xinoip/gokit/errs"
 )
 
 type CreateNoteParams struct {
@@ -87,4 +90,22 @@ func (s *PostgresStore) ListNotes(ctx context.Context) ([]Note, error) {
 	}
 
 	return notes, nil
+}
+
+func noteFromDB(note gen.Notes) *Note {
+	return &Note{
+		NoteID:    note.NoteID,
+		Title:     note.Title,
+		Body:      note.Body,
+		CreatedAt: note.CreatedAt,
+		UpdatedAt: note.UpdatedAt,
+	}
+}
+
+func wrapNotFound(action string, err error) error {
+	if errors.Is(err, pgx.ErrNoRows) {
+		return errs.NotFoundf("%s: %w", action, err)
+	}
+
+	return fmt.Errorf("%s: %w", action, err)
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"example/internal/gen"
 	handlersv1 "example/internal/handlers/v1"
 	"example/internal/notes"
 
@@ -48,8 +47,6 @@ func serve(ctx context.Context, c *Config) error {
 		return fmt.Errorf("failed to ping redis: %w", err)
 	}
 
-	noteStore := notes.NewPostgresStore(gen.New(pgdb))
-	noteCache := notes.NewRedisCache(rdb)
 	apir := api.NewRegistry(&api.NewRegistryParams{
 		Mux:     r,
 		Title:   "Notes API",
@@ -62,11 +59,7 @@ func serve(ctx context.Context, c *Config) error {
 	})
 
 	v1Handlers := handlersv1.Handlers{
-		CreateNoteCommandHandler: notes.NewCreateCommandHandler(noteStore, noteCache),
-		UpdateNoteCommandHandler: notes.NewUpdateCommandHandler(noteStore, noteCache),
-		DeleteNoteCommandHandler: notes.NewDeleteCommandHandler(noteStore, noteCache),
-		ListNotesQueryHandler:    notes.NewListQueryHandler(noteStore),
-		GetNoteQueryHandler:      notes.NewGetQueryHandler(noteStore, noteCache),
+		RPCNotes: notes.NewRPC(pgdb, rdb),
 	}
 	v1Handlers.Register(apir)
 
