@@ -63,3 +63,8 @@ func Patch[TReq, TRes any](r *Registry, path string, handler Handler[TReq, TRes]
 		Middlewares: huma.Middlewares{},
 	}, handler, opts...)
 }
+
+// RPC is same as [POST] but intentionally limited to create RPC endpoints.
+func RPC[TReq, TRes any](r *Registry, handler Handler[TReq, TRes], name string, opts ...Option) {
+	Post(r, "/rpc/"+name, handler, name, opts...)
+}
