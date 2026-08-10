@@ -37,15 +37,16 @@ func HTTP500(err error) error {
 
 // HTTPError is a convenience function that maps known errors to HTTP errors.
 func HTTPError(err error) error {
-	if IsInternal(err) {
+	switch {
+	case err == nil:
+		return nil
+	case IsFailure(err):
+		return HTTP500(err)
+	case IsNotFound(err):
+		return HTTP404(err)
+	case IsInternal(err):
+		fallthrough
+	default:
 		return HTTP500(err)
 	}
-	if IsNotFound(err) {
-		return HTTP404(err)
-	}
-	if err != nil {
-		return HTTP400(err)
-	}
-
-	return nil
 }
