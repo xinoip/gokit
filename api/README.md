@@ -32,3 +32,11 @@ err := r.CreateYAMLSpecFile("openapi.yaml")
 
 // Serve your myChiMux as you wish. It now has all the endpoints registered.
 ```
+
+## RPC
+
+This package also provides an opinionated way to create and handle JSON RPC like
+endpoints. While these endpoints are not fully compliant with JSON RPC spec,
+they operate on a simple principle: They take in parameters in JSON body and
+return result in JSON body, while utilizing predefined errors defined in `errs`
+package.`RPC` fluent helper should be used to register RPC endpoints.
