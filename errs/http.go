@@ -40,12 +40,12 @@ func HTTPError(err error) error {
 	switch {
 	case err == nil:
 		return nil
+	case IsInternal(err):
+		return HTTP500(err)
 	case IsFailure(err):
 		return HTTP400(err)
 	case IsNotFound(err):
 		return HTTP404(err)
-	case IsInternal(err):
-		fallthrough
 	default:
 		return HTTP500(err)
 	}
