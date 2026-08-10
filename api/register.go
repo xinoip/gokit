@@ -1,15 +1,15 @@
 package api
 
 import (
-	"fmt"
-	"log/slog"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
+)
+
+const (
+	bearerScheme = "bearer"
 )
 
 // Registry holds an API definition and is needed for registering endpoints.
@@ -35,9 +35,9 @@ func NewRegistry(p *NewRegistryParams) *Registry {
 	humaConfig := huma.DefaultConfig(p.Title, p.Version)
 	humaConfig.DocsPath = "/swagger"
 	humaConfig.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
-		"bearer": {
+		bearerScheme: {
 			Type:   "http",
-			Scheme: "bearer",
+			Scheme: bearerScheme,
 		},
 	}
 	humaAPI := humachi.New(p.Mux, humaConfig)
@@ -63,7 +63,7 @@ func Register[TReq, TRes any](r *Registry, pe *Endpoint, h Handler[TReq, TRes], 
 	if e.Secure {
 		middlewares = append(middlewares, r.SecureMiddleware)
 		securitySchema = []map[string][]string{
-			{"bearer": {}},
+			{bearerScheme: {}},
 		}
 	}
 
@@ -76,41 +76,4 @@ func Register[TReq, TRes any](r *Registry, pe *Endpoint, h Handler[TReq, TRes], 
 		Middlewares:   middlewares,
 		Security:      securitySchema,
 	}, h)
-}
-
-// CreateSpecFiles creates the OpenAPI spec files in the current working
-// directory.
-func (r *Registry) CreateSpecFiles() error {
-	jsonData, err := r.HumaAPI.OpenAPI().MarshalJSON()
-	if err != nil {
-		return fmt.Errorf("failed to marshal OpenAPI to JSON: %w", err)
-	}
-
-	var fileMode os.FileMode = 0644
-
-	wd, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
-	}
-
-	jsonFilePath := filepath.Join(wd, "openapi.json")
-	err = os.WriteFile(jsonFilePath, jsonData, fileMode)
-	if err != nil {
-		return fmt.Errorf("failed to write openapi.json: %w", err)
-	}
-
-	yamlData, err := r.HumaAPI.OpenAPI().YAML()
-	if err != nil {
-		return fmt.Errorf("failed to marshal OpenAPI to YAML: %w", err)
-	}
-
-	yamlFilePath := filepath.Join(wd, "openapi.yaml")
-	err = os.WriteFile(yamlFilePath, yamlData, fileMode)
-	if err != nil {
-		return fmt.Errorf("failed to write openapi.yaml: %w", err)
-	}
-
-	slog.Info("OpenAPI spec files created", "json", jsonFilePath, "yaml", yamlFilePath)
-
-	return nil
 }

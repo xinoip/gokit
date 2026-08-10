@@ -12,6 +12,13 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+const (
+	postgresUser     = "postgres"
+	postgresPassword = "postgres"
+	postgresHost     = "localhost"
+	postgresPort     = "5432"
+)
+
 // NewPostgres creates a new database for testing using [pgtestdb]. It is basically a
 // template based, migrations supported, fast Postgres instance.
 func NewPostgres(t *testing.T, migrationsFS fs.FS) *pgx.Conn {
@@ -20,10 +27,10 @@ func NewPostgres(t *testing.T, migrationsFS fs.FS) *pgx.Conn {
 
 	dbconf := pgtestdb.Config{
 		DriverName:                "pgx",
-		User:                      "postgres",
-		Password:                  "postgres",
-		Host:                      "localhost",
-		Port:                      "5432",
+		User:                      postgresUser,
+		Password:                  postgresPassword,
+		Host:                      postgresHost,
+		Port:                      postgresPort,
 		Options:                   "sslmode=disable",
 		Database:                  "postgres",
 		TestRole:                  nil,
