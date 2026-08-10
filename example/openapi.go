@@ -26,5 +26,10 @@ func createOpenAPI() error {
 
 	new(handlersv1.Handlers).Register(apir)
 
-	return apir.CreateSpecFiles()
+	err := apir.CreateJSONSpecFile("openapi.json")
+	if err != nil {
+		return err
+	}
+
+	return apir.CreateYAMLSpecFile("openapi.yaml")
 }
