@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/sethvargo/go-envconfig"
 )
@@ -26,7 +27,7 @@ func main() {
 }
 
 func Run() error {
-	ctx, cancel := signal.NotifyContext(context.Background())
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill, syscall.SIGTERM)
 	defer cancel()
 
 	if len(os.Args) != 2 {
