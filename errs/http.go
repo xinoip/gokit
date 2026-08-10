@@ -41,7 +41,7 @@ func HTTPError(err error) error {
 	case err == nil:
 		return nil
 	case IsFailure(err):
-		return HTTP500(err)
+		return HTTP400(err)
 	case IsNotFound(err):
 		return HTTP404(err)
 	case IsInternal(err):
