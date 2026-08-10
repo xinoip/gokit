@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
 
 	"github.com/sethvargo/go-envconfig"
 )
@@ -25,7 +26,8 @@ func main() {
 }
 
 func Run() error {
-	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(context.Background())
+	defer cancel()
 
 	if len(os.Args) != 2 {
 		return errors.New("invalid number of arguments")
