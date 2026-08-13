@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http/httptest"
 	"testing"
 
@@ -22,8 +23,11 @@ func NewTestAPIRegistry(t *testing.T) (*api.Registry, humatest.TestAPI) {
 	_, humaAPI := humatest.New(t)
 	return &api.Registry{
 		HumaAPI: humaAPI,
-		SecureMiddleware: func(_ huma.Context, _ func(huma.Context)) {
-			panic("SecureMiddleware is not set during testing")
+		SecureMiddleware: func(ctx huma.Context, next func(huma.Context)) {
+			slog.Warn("SecureMiddleware is not implemented for testing", "case", t.Name())
+
+			// Tests can register secure endpoints without implementing authentication.
+			next(ctx)
 		},
 	}, humaAPI
 }
