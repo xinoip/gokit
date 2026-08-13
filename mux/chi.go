@@ -43,8 +43,16 @@ func NewChi(p *NewChiParams) *chi.Mux {
 		cors.Handler(
 			//nolint:exhaustruct
 			cors.Options{
-				AllowedOrigins:   p.AllowOrigins,
-				AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
+				AllowedOrigins: p.AllowOrigins,
+				AllowedMethods: []string{
+					http.MethodGet,
+					http.MethodPost,
+					http.MethodPut,
+					http.MethodDelete,
+					http.MethodPatch,
+					http.MethodOptions,
+					http.MethodHead,
+				},
 				AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 				ExposedHeaders:   []string{"Link"},
 				AllowCredentials: true,
