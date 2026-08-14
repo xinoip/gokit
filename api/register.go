@@ -57,7 +57,7 @@ func Register[TReq, TRes any](r *Registry, pe *Endpoint, h Handler[TReq, TRes], 
 		opt(&e)
 	}
 
-	middlewares := e.Middlewares
+	middlewares := huma.Middlewares{}
 	securitySchema := []map[string][]string{}
 
 	if e.Secure {
@@ -66,6 +66,8 @@ func Register[TReq, TRes any](r *Registry, pe *Endpoint, h Handler[TReq, TRes], 
 			{bearerScheme: {}},
 		}
 	}
+
+	middlewares = append(middlewares, e.Middlewares...)
 
 	//nolint:exhaustruct // [huma.Operation]
 	huma.Register(r.HumaAPI, huma.Operation{
