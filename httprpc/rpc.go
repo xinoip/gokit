@@ -22,17 +22,25 @@ type Response[T any] struct {
 // Failure indicates an expected error happened during RPC handler execution.
 // These errors are treated safe to expose to public and will be translated to
 // HTTP 400 responses.
-var Failure = errors.New("rpc failure")
+type Failure string
+
+// Error implements the error interface.
+func (f Failure) Error() string {
+	return string(f)
+}
 
 func errToHTTPError(err error) error {
-	switch {
-	case err == nil:
+	if err == nil {
 		return nil
-	case errors.Is(err, Failure):
-		return api.HTTP400(err)
-	default:
-		return api.HTTP500(err)
 	}
+
+	// Only extract failure from error so that we don't expose any other errors.
+	failure, ok := errors.AsType[Failure](err)
+	if ok {
+		return api.HTTP400(failure)
+	}
+
+	return api.HTTP500(err)
 }
 
 // MakeHandler creates the opinionated HTTP handler for an RPC endpoint.
