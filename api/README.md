@@ -6,9 +6,5 @@ powered by [Huma](https://github.com/danielgtaylor/huma) and [Chi](https://githu
 See the package documentation for runnable examples covering registry creation,
 endpoint registration, and OpenAPI generation.
 
-## RPC
-
-This package also provides an opinionated way to create and handle JSON-RPC-like
-endpoints. These endpoints are not fully compliant with the JSON-RPC
-specification. They accept parameters in a JSON body and return results in a
-JSON body. Returned HTTP status codes are highly opinionated.
+For opinionated JSON-RPC-like endpoints built on this package, use
+[`httprpc`](../httprpc/README.md).
