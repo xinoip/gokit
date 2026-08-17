@@ -1,4 +1,4 @@
-package api_test
+package httpapi_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/go-chi/chi/v5"
-	"github.com/xinoip/gokit/api"
+	"github.com/xinoip/gokit/httpapi"
 )
 
 type exampleRequest struct{}
@@ -23,11 +23,11 @@ func exampleMiddleware(ctx huma.Context, next func(huma.Context)) {
 }
 
 func ExampleNewRegistry() {
-	r := api.NewRegistry(&api.NewRegistryParams{
+	r := httpapi.NewRegistry(&httpapi.NewRegistryParams{
 		Mux:     chi.NewRouter(),
 		Title:   "Things API",
 		Version: "v1.0.0",
-		SecureMiddlewareMaker: func(_ huma.API) api.Middleware {
+		SecureMiddlewareMaker: func(_ huma.API) httpapi.Middleware {
 			return func(ctx huma.Context, next func(huma.Context)) {
 				// Implement your authentication middleware here.
 				next(ctx)
@@ -36,17 +36,17 @@ func ExampleNewRegistry() {
 	})
 
 	// Supports all HTTP methods.
-	api.Get(r, "/things", exampleHandler, "get-things", api.WithInsecure())
-	api.Post(r, "/things", exampleHandler, "create-things", api.WithInsecure())
-	api.Put(r, "/things", exampleHandler, "update-things", api.WithInsecure())
-	api.Delete(r, "/things", exampleHandler, "delete-things", api.WithInsecure())
-	api.Patch(r, "/things", exampleHandler, "patch-things", api.WithInsecure())
+	httpapi.Get(r, "/things", exampleHandler, "get-things", httpapi.WithInsecure())
+	httpapi.Post(r, "/things", exampleHandler, "create-things", httpapi.WithInsecure())
+	httpapi.Put(r, "/things", exampleHandler, "update-things", httpapi.WithInsecure())
+	httpapi.Delete(r, "/things", exampleHandler, "delete-things", httpapi.WithInsecure())
+	httpapi.Patch(r, "/things", exampleHandler, "patch-things", httpapi.WithInsecure())
 
 	// Can modify with options.
-	api.Get(r, "/things/custom", exampleHandler, "get-things-custom", api.WithMiddlewares(exampleMiddleware))
+	httpapi.Get(r, "/things/custom", exampleHandler, "get-things-custom", httpapi.WithMiddlewares(exampleMiddleware))
 
 	// Endpoints are secure by default, meaning SecureMiddleware is always active.
-	api.Get(r, "/things", exampleHandler, "get-things-secure")
+	httpapi.Get(r, "/things", exampleHandler, "get-things-secure")
 
 	// OpenAPI spec is already supported and can be generated.
 	err := r.CreateJSONSpecFile("/tmp/openapi.json")

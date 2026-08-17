@@ -1,9 +1,14 @@
 package httprpc
 
-import "github.com/xinoip/gokit/api"
+import "github.com/xinoip/gokit/httpapi"
 
-// RPC is same as [api.POST] but intentionally limited to create RPC endpoints.
-func RPC[TReq, TRes any](r *api.Registry, handler api.Handler[TReq, TRes], name string, opts ...api.Option) {
+// Handle registers an RPC handler as an HTTP POST endpoint.
+func Handle[TReq, TRes any](
+	r *httpapi.Registry,
+	handler httpapi.Handler[TReq, TRes],
+	name string,
+	opts ...httpapi.Option,
+) {
 	rpcHandler := MakeHandler(handler)
-	api.Post(r, "/rpc/"+name, rpcHandler, name, opts...)
+	httpapi.Post(r, "/rpc/"+name, rpcHandler, name, opts...)
 }

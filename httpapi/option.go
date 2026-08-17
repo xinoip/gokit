@@ -1,4 +1,4 @@
-package api
+package httpapi
 
 // Option is a modification for an endpoint. Can be used to further customize an endpoint.
 type Option func(*Endpoint)

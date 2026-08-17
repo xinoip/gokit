@@ -1,6 +1,6 @@
 # Pio's Go Kit: HTTP RPC
 
-This package can't be used without `gokit/api` package. It provides convenience
+This package builds on `gokit/httpapi`. It provides convenience
 functions for defining opinionated JSON-RPC like HTTP APIs.
 
 ## Principles

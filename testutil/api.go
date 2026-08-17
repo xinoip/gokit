@@ -10,18 +10,18 @@ import (
 	"github.com/danielgtaylor/huma/v2/humatest"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xinoip/gokit/api"
+	"github.com/xinoip/gokit/httpapi"
 )
 
-// NewTestAPIRegistry creates a testing instance of [api.Registry] with support
+// NewTestAPIRegistry creates a testing instance of [httpapi.Registry] with support
 // for [humatest].
 //
 //nolint:ireturn // [humatest.TestAPI] is intended to be an interface.
-func NewTestAPIRegistry(t *testing.T) (*api.Registry, humatest.TestAPI) {
+func NewTestAPIRegistry(t *testing.T) (*httpapi.Registry, humatest.TestAPI) {
 	t.Helper()
 
 	_, humaAPI := humatest.New(t)
-	return &api.Registry{
+	return &httpapi.Registry{
 		HumaAPI: humaAPI,
 		SecureMiddleware: func(ctx huma.Context, next func(huma.Context)) {
 			slog.Warn("SecureMiddleware is not implemented for testing", "case", t.Name())

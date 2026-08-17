@@ -3,7 +3,8 @@ package v1
 import (
 	"example/internal/notes"
 
-	"github.com/xinoip/gokit/api"
+	"github.com/xinoip/gokit/httpapi"
+	"github.com/xinoip/gokit/httprpc"
 )
 
 type Handlers struct {
@@ -16,10 +17,10 @@ func NewHandlers(rpc *notes.RPC) *Handlers {
 	}
 }
 
-func (h *Handlers) Register(r *api.Registry) {
-	api.RPC(r, h.RPCNotes.List, "list_notes", api.WithInsecure())
-	api.RPC(r, h.RPCNotes.Create, "create_note", api.WithInsecure())
-	api.RPC(r, h.RPCNotes.Get, "get_note", api.WithInsecure())
-	api.RPC(r, h.RPCNotes.Update, "update_note", api.WithInsecure())
-	api.RPC(r, h.RPCNotes.Delete, "delete_note", api.WithInsecure())
+func (h *Handlers) Register(r *httpapi.Registry) {
+	httprpc.Handle(r, h.RPCNotes.List, "list_notes", httpapi.WithInsecure())
+	httprpc.Handle(r, h.RPCNotes.Create, "create_note", httpapi.WithInsecure())
+	httprpc.Handle(r, h.RPCNotes.Get, "get_note", httpapi.WithInsecure())
+	httprpc.Handle(r, h.RPCNotes.Update, "update_note", httpapi.WithInsecure())
+	httprpc.Handle(r, h.RPCNotes.Delete, "delete_note", httpapi.WithInsecure())
 }

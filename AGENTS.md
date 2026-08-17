@@ -4,7 +4,7 @@
 
 This repository is a collection of intentionally isolated Go packages under the module `github.com/xinoip/gokit`. Core packages live at the repository root:
 
-- `api/` defines Huma-based API registration and endpoint helpers.
+- `httpapi/` defines Huma-based HTTP API registration and endpoint helpers.
 - `httprpc/` provides RPC request/response conventions.
 - `mux/` contains Chi router construction and middleware configuration.
 - `server/` provides HTTP server lifecycle helpers.

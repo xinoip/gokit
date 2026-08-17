@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/xinoip/gokit/errs"
+	"github.com/xinoip/gokit/httprpc"
 )
 
 type CreateNoteParams struct {
@@ -104,7 +104,7 @@ func noteFromDB(note gen.Notes) *Note {
 
 func wrapNotFound(action string, err error) error {
 	if errors.Is(err, pgx.ErrNoRows) {
-		return errs.NotFoundf("%s: %w", action, err)
+		return fmt.Errorf("%w: %s: %w", httprpc.Failure("note not found"), action, err)
 	}
 
 	return fmt.Errorf("%s: %w", action, err)

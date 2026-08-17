@@ -1,12 +1,12 @@
 // Package httprpc provides an opinionated way to create and handle JSON-RPC-like
-// endpoints, using [api] package.
+// endpoints using the [httpapi] package.
 package httprpc
 
 import (
 	"context"
 	"errors"
 
-	"github.com/xinoip/gokit/api"
+	"github.com/xinoip/gokit/httpapi"
 )
 
 // Request represents the request for an RPC endpoint.
@@ -39,10 +39,10 @@ func errToHTTPError(err error) error {
 	// Only extract failure from error so that we don't expose any other errors.
 	failure, ok := errors.AsType[Failure](err)
 	if ok {
-		return api.HTTP400(failure)
+		return httpapi.HTTP400(failure)
 	}
 
-	return api.HTTP500(err)
+	return httpapi.HTTP500(err)
 }
 
 // MakeHandler creates the opinionated HTTP handler for an RPC endpoint.
@@ -53,7 +53,7 @@ func errToHTTPError(err error) error {
 // - 200: Handler does not return any error.
 //
 // Requests and responses are JSON-encoded and expected to be in the HTTP body.
-func MakeHandler[TReq, TRes any](rpc api.Handler[TReq, TRes]) api.Handler[Request[TReq], Response[TRes]] {
+func MakeHandler[TReq, TRes any](rpc httpapi.Handler[TReq, TRes]) httpapi.Handler[Request[TReq], Response[TRes]] {
 	return func(ctx context.Context, req *Request[TReq]) (*Response[TRes], error) {
 		res, err := rpc(ctx, req.Body)
 		if err != nil {

@@ -1,6 +1,6 @@
-// Package api provides a fluent and convenient API for defining endpoints,
+// Package httpapi provides a fluent and convenient API for defining HTTP endpoints,
 // using Huma and Chi as the backend.
-package api
+package httpapi
 
 import (
 	"context"

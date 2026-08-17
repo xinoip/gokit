@@ -1,4 +1,4 @@
-# Pio's Go Kit: API
+# Pio's Go Kit: HTTP API
 
 Provides convenience functions for defining APIs with OpenAPI support. It is
 powered by [Huma](https://github.com/danielgtaylor/huma) and [Chi](https://github.com/go-chi/chi).

@@ -7,7 +7,7 @@ import (
 )
 
 type RPCUpdateParams struct {
-	NoteID uuid.UUID `json:"noteID"`
+	NoteID uuid.UUID `json:"noteId"`
 	Title  string    `json:"title"`
 	Body   string    `json:"body"`
 }
