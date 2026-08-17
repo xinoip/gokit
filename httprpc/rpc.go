@@ -22,6 +22,8 @@ type Response[T any] struct {
 // Failure indicates an expected error happened during RPC handler execution.
 // These errors are treated safe to expose to public and will be translated to
 // HTTP 400 responses.
+//
+//nolint:errname // Failure is the RPC domain term and part of the public API.
 type Failure string
 
 // Error implements the error interface.

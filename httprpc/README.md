@@ -13,7 +13,6 @@ It's built upon these principles, where an RPC endpoint is:
 - Responses returned in JSON encoded HTTP body.
 - Can only return 200, 400 or 500 HTTP status codes.
 - 200 is returned when no error returned from handler.
-- 400 is returned when `rpc.Failure` is returned.
+- 400 is returned when `httprpc.Failure` is returned.
 - Each HTTP endpoint is a remote procedure call in disguise.
-- RPC endpoints can only return 200, 400 or 500.
 - URL paths are in form of `/rpc/<name_of_procedure>`.
