@@ -9,9 +9,7 @@ import (
 )
 
 func createOpenAPI() error {
-	r := mux.NewChi(&mux.NewChiParams{
-		AllowOrigins: []string{"https://*"},
-	})
+	r := mux.NewChi(mux.DefaultChiConfig())
 
 	apir := httpapi.NewRegistry(&httpapi.NewRegistryParams{
 		Mux:     r,

@@ -17,9 +17,7 @@ import (
 )
 
 func serve(ctx context.Context, c *Config) error {
-	r := mux.NewChi(&mux.NewChiParams{
-		AllowOrigins: []string{"https://*"},
-	})
+	r := mux.NewChi(mux.DefaultChiConfig())
 
 	pgdb, err := pgxpool.New(ctx, c.PostgresConnURL)
 	if err != nil {
@@ -58,13 +56,15 @@ func serve(ctx context.Context, c *Config) error {
 		},
 	})
 
+	notesRPC, err := notes.NewRPC(pgdb, rdb)
+	if err != nil {
+		return fmt.Errorf("create notes RPC: %w", err)
+	}
+
 	v1Handlers := handlersv1.Handlers{
-		RPCNotes: notes.NewRPC(pgdb, rdb),
+		RPCNotes: notesRPC,
 	}
 	v1Handlers.Register(apir)
 
-	return server.ServeHTTP(ctx, &server.ServeHTTPParams{
-		Addr:    c.ServeAddr,
-		Handler: r,
-	})
+	return server.ServeHTTP(ctx, server.DefaultHTTPConfig(c.ServeAddr, r))
 }
