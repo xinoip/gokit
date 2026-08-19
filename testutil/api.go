@@ -2,11 +2,9 @@ package testutil
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/humatest"
 	"github.com/stretchr/testify/require"
 
@@ -32,9 +30,9 @@ func NewTestAPIRegistry(t *testing.T) (*httpapi.Registry, humatest.TestAPI) {
 	}, humaAPI
 }
 
-// MarshalJSON is a testing helper to unmarshal a JSON string into a
+// UnmarshalJSONString is a testing helper to unmarshal a JSON string into a
 // map[string]any.
-func MarshalJSON(t *testing.T, s string) map[string]any {
+func UnmarshalJSONString(t *testing.T, s string) map[string]any {
 	t.Helper()
 
 	var m map[string]any
