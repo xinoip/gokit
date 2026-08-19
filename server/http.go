@@ -52,12 +52,15 @@ func ServeHTTP(ctx context.Context, config HTTPConfig) error {
 	}
 
 	errChan := make(chan error, 1)
+
 	go func() {
-		config.Logger.Info("Started HTTP server", "addr", config.Addr)
+		config.Logger.Info("Starting HTTP server", "addr", config.Addr)
+
 		err := s.ListenAndServe()
 		if errors.Is(err, http.ErrServerClosed) {
 			err = nil
 		}
+
 		errChan <- err
 	}()
 
@@ -75,26 +78,17 @@ func ServeHTTP(ctx context.Context, config HTTPConfig) error {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), config.ShutdownTimeout)
 		defer cancel()
 
-		//nolint:contextcheck // ctx is already done, so use background context for shutdown.
+		//nolint:contextcheck // shutdownCtx uses new background context since ctx is already done.
 		shutdownErr := s.Shutdown(shutdownCtx)
 		if shutdownErr != nil {
 			shutdownErr = fmt.Errorf("shut down HTTP server: %w", shutdownErr)
+
 			closeErr := s.Close()
 			if closeErr != nil {
 				closeErr = fmt.Errorf("force close HTTP server: %w", closeErr)
 			}
 
-			serveErr := <-errChan
-			if serveErr != nil {
-				serveErr = fmt.Errorf("serve HTTP: %w", serveErr)
-			}
-
-			return errors.Join(shutdownErr, closeErr, serveErr)
-		}
-
-		serveErr := <-errChan
-		if serveErr != nil {
-			return fmt.Errorf("serve HTTP: %w", serveErr)
+			return errors.Join(shutdownErr, closeErr)
 		}
 
 		return nil
