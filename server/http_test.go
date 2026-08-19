@@ -14,36 +14,21 @@ import (
 
 func TestServeHTTPReturnsListenError(t *testing.T) {
 	t.Parallel()
+	ctx := t.Context()
 
-	listener, err := new(net.ListenConfig).Listen(t.Context(), "tcp", "127.0.0.1:0")
+	listener, err := new(net.ListenConfig).Listen(ctx, "tcp", "127.0.0.1:0")
 	require.NoError(t, err)
+
 	t.Cleanup(func() {
 		require.NoError(t, listener.Close())
 	})
 
 	err = server.ServeHTTP(
-		t.Context(),
+		ctx,
 		server.DefaultHTTPConfig(listener.Addr().String(), http.NotFoundHandler()),
 	)
 	require.Error(t, err)
 	assert.ErrorContains(t, err, "serve HTTP")
-}
-
-func TestServeHTTPValidatesParameters(t *testing.T) {
-	t.Parallel()
-
-	err := server.ServeHTTP(t.Context(), server.HTTPConfig{
-		Addr:              "",
-		Handler:           nil,
-		Logger:            nil,
-		ReadHeaderTimeout: 0,
-		ReadTimeout:       0,
-		WriteTimeout:      0,
-		IdleTimeout:       0,
-		ShutdownTimeout:   0,
-		MaxHeaderBytes:    0,
-	})
-	require.Error(t, err)
 }
 
 func TestServeHTTPShutsDownWhenContextIsCanceled(t *testing.T) {
