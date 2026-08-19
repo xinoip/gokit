@@ -2,54 +2,101 @@ package server
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
-// ServeHTTPParams of [ServeHTTP].
-type ServeHTTPParams struct {
-	Addr    string
-	Handler http.Handler
+// HTTPConfig configures [ServeHTTP]. Start with [DefaultHTTPConfig] and
+// override the values needed by the application.
+type HTTPConfig struct {
+	Addr              string
+	Handler           http.Handler
+	Logger            *slog.Logger
+	ReadHeaderTimeout time.Duration
+	ReadTimeout       time.Duration
+	WriteTimeout      time.Duration
+	IdleTimeout       time.Duration
+	ShutdownTimeout   time.Duration
+	MaxHeaderBytes    int
 }
 
-// ServeHTTP serves an HTTP server with sane defaults and graceful shutdown support.
-func ServeHTTP(ctx context.Context, p *ServeHTTPParams) error {
-	s := &http.Server{
-		Addr:              p.Addr,
-		Handler:           p.Handler,
+// DefaultHTTPConfig returns the production-oriented server defaults.
+func DefaultHTTPConfig(addr string, handler http.Handler) HTTPConfig {
+	return HTTPConfig{
+		Addr:              addr,
+		Handler:           handler,
+		Logger:            slog.Default(),
 		ReadHeaderTimeout: readHeaderTimeout,
 		ReadTimeout:       readTimeout,
 		WriteTimeout:      writeTimeout,
 		IdleTimeout:       idleTimeout,
+		ShutdownTimeout:   shutdownTimeout,
 		MaxHeaderBytes:    maxHeaderBytes,
+	}
+}
+
+// ServeHTTP serves an HTTP server with passed in [config] and graceful
+// shut down support.
+func ServeHTTP(ctx context.Context, config HTTPConfig) error {
+	s := &http.Server{
+		Addr:              config.Addr,
+		Handler:           config.Handler,
+		ReadHeaderTimeout: config.ReadHeaderTimeout,
+		ReadTimeout:       config.ReadTimeout,
+		WriteTimeout:      config.WriteTimeout,
+		IdleTimeout:       config.IdleTimeout,
+		MaxHeaderBytes:    config.MaxHeaderBytes,
 	}
 
 	errChan := make(chan error, 1)
 	go func() {
-		slog.Info("Started HTTP server", "addr", p.Addr)
+		config.Logger.Info("Started HTTP server", "addr", config.Addr)
 		err := s.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			errChan <- err
+		if errors.Is(err, http.ErrServerClosed) {
+			err = nil
 		}
-		close(errChan)
+		errChan <- err
 	}()
 
 	select {
 	case err := <-errChan:
-		slog.Error("Error encountered while serving HTTP server", "addr", p.Addr, "err", err.Error())
-		return err
-	case <-ctx.Done():
-		slog.Info("Shutting down HTTP server", "addr", p.Addr, "timeout", shutdownTimeout)
+		if err != nil {
+			config.Logger.Error("Error encountered while serving HTTP server", "addr", config.Addr, "err", err)
+			return fmt.Errorf("serve HTTP: %w", err)
+		}
 
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		return nil
+	case <-ctx.Done():
+		config.Logger.Info("Shutting down HTTP server", "addr", config.Addr, "timeout", config.ShutdownTimeout)
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), config.ShutdownTimeout)
 		defer cancel()
 
 		//nolint:contextcheck // ctx is already done, so use background context for shutdown.
-		err := s.Shutdown(shutdownCtx)
-		if err != nil {
-			return err
+		shutdownErr := s.Shutdown(shutdownCtx)
+		if shutdownErr != nil {
+			shutdownErr = fmt.Errorf("shut down HTTP server: %w", shutdownErr)
+			closeErr := s.Close()
+			if closeErr != nil {
+				closeErr = fmt.Errorf("force close HTTP server: %w", closeErr)
+			}
+
+			serveErr := <-errChan
+			if serveErr != nil {
+				serveErr = fmt.Errorf("serve HTTP: %w", serveErr)
+			}
+
+			return errors.Join(shutdownErr, closeErr, serveErr)
 		}
-		<-errChan
+
+		serveErr := <-errChan
+		if serveErr != nil {
+			return fmt.Errorf("serve HTTP: %w", serveErr)
+		}
+
 		return nil
 	}
 }
