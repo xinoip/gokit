@@ -34,7 +34,7 @@ func Up(ctx context.Context, conn *sql.DB, migrationsFS fs.FS, directory string)
 }
 
 // UpURL is an opinionated helper that, opens a database connection, runs [Up]
-// agains directory named 'migrations' and closes the connection before
+// against directory named 'migrations' and closes the connection before
 // returning.
 func UpURL(ctx context.Context, connURL string, migrationsFS fs.FS) (retErr error) {
 	db, err := sql.Open("pgx", connURL)
