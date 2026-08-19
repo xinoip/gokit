@@ -25,9 +25,9 @@ type ChiConfig struct {
 }
 
 // DefaultChiConfig returns opinionated, production oriented [ChiConfig].
-func DefaultChiConfig(allowedOrigins ...string) ChiConfig {
+func DefaultChiConfig() ChiConfig {
 	return ChiConfig{
-		AllowedOrigins:      allowedOrigins,
+		AllowedOrigins:      []string{"https://*"},
 		Logger:              slog.Default(),
 		RequestTimeout:      requestTimeout,
 		RateLimit:           maxRequestCountPerMinute,
