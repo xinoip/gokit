@@ -1,8 +1,10 @@
 package testutil
 
 import (
+	"context"
 	"io/fs"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/peterldowns/pgtestdb"
@@ -13,10 +15,11 @@ import (
 )
 
 const (
-	postgresUser     = "postgres"
-	postgresPassword = "postgres"
-	postgresHost     = "localhost"
-	postgresPort     = "5432"
+	postgresUser         = "postgres"
+	postgresPassword     = "postgres"
+	postgresHost         = "localhost"
+	postgresPort         = "5432"
+	postgresCloseTimeout = 5 * time.Second
 )
 
 // NewPostgres creates a new database for testing using [pgtestdb]. It is basically a
@@ -48,7 +51,10 @@ func NewPostgres(t *testing.T, migrationsFS fs.FS) *pgx.Conn {
 	conn, err := pgx.Connect(ctx, conf.URL())
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		err := conn.Close(ctx)
+		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), postgresCloseTimeout)
+		defer cancel()
+
+		err := conn.Close(closeCtx)
 		require.NoError(t, err)
 	})
 
