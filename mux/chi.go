@@ -12,38 +12,63 @@ import (
 	"github.com/go-chi/httprate"
 )
 
-// NewChiParams of [NewChi].
-type NewChiParams struct {
-	AllowOrigins []string
+// ChiConfig configures [NewChi].
+type ChiConfig struct {
+	AllowedOrigins      []string
+	Logger              *slog.Logger
+	RequestTimeout      time.Duration
+	RateLimit           int
+	RateWindow          time.Duration
+	RateLimitMiddleware func(http.Handler) http.Handler
+	CORSMaxAge          int
+	AllowCredentials    bool
 }
 
-// NewChi creates a new mux with chi library that has sane defaults and
-// middlewares setup.
-func NewChi(p *NewChiParams) *chi.Mux {
+// DefaultChiConfig returns opinionated, production oriented [ChiConfig].
+func DefaultChiConfig(allowedOrigins ...string) ChiConfig {
+	return ChiConfig{
+		AllowedOrigins:      allowedOrigins,
+		Logger:              slog.Default(),
+		RequestTimeout:      requestTimeout,
+		RateLimit:           maxRequestCountPerMinute,
+		RateWindow:          time.Minute,
+		RateLimitMiddleware: nil,
+		CORSMaxAge:          corsMaxAge,
+		AllowCredentials:    true,
+	}
+}
+
+// NewChi creates a new mux with chi library using passed in config.
+func NewChi(p ChiConfig) *chi.Mux {
 	r := chi.NewMux()
 
 	r.Use(
 		httplog.RequestLogger(
-			slog.Default(),
+			p.Logger,
 			//nolint:exhaustruct // [httplog.Options]
 			&httplog.Options{
 				Level:         slog.LevelWarn,
 				Schema:        httplog.SchemaECS,
 				RecoverPanics: true,
 				Skip: func(_ *http.Request, respStatus int) bool {
-					return respStatus == 404 || respStatus == 401 || respStatus == 403
+					return respStatus == http.StatusNotFound
 				},
 			},
 		),
 	)
-	r.Use(httprate.LimitByIP(maxRequestCountPerMinute, time.Minute))
-	r.Use(chimiddleware.Recoverer)
-	r.Use(chimiddleware.Timeout(requestTimeout))
+	if p.RateLimitMiddleware != nil {
+		r.Use(p.RateLimitMiddleware)
+	} else if p.RateLimit > 0 && p.RateWindow > 0 {
+		r.Use(httprate.LimitByIP(p.RateLimit, p.RateWindow))
+	}
+	if p.RequestTimeout > 0 {
+		r.Use(chimiddleware.Timeout(p.RequestTimeout))
+	}
 	r.Use(
 		cors.Handler(
 			//nolint:exhaustruct
 			cors.Options{
-				AllowedOrigins: p.AllowOrigins,
+				AllowedOrigins: p.AllowedOrigins,
 				AllowedMethods: []string{
 					http.MethodGet,
 					http.MethodPost,
@@ -55,8 +80,8 @@ func NewChi(p *NewChiParams) *chi.Mux {
 				},
 				AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 				ExposedHeaders:   []string{"Link"},
-				AllowCredentials: true,
-				MaxAge:           corsMaxAge,
+				AllowCredentials: p.AllowCredentials,
+				MaxAge:           p.CORSMaxAge,
 				Debug:            false,
 			},
 		),
