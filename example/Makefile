@@ -25,6 +25,9 @@ clean:
 test: build
 	go test -coverprofile=coverage.out -race ./...
 
+test-debug:
+	go test -v -parallel=1 ./...
+
 doc:
 	pkgsite -open
 

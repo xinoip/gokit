@@ -15,6 +15,9 @@ lint-example:
 test:
 	go test -coverprofile=coverage.out -race ./...
 
+test-debug:
+	go test -v -parallel=1 ./...
+
 test-example:
 	cd example && make test
 
