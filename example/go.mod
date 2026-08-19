@@ -7,11 +7,11 @@ tool github.com/sqlc-dev/sqlc/cmd/sqlc
 replace github.com/xinoip/gokit => ../
 
 require (
-	github.com/danielgtaylor/huma/v2 v2.38.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/redis/go-redis/v9 v9.20.1
 	github.com/sethvargo/go-envconfig v1.3.0
+	github.com/stretchr/testify v1.11.1
 	github.com/xinoip/gokit v0.0.0-00010101000000-000000000000
 )
 
@@ -22,6 +22,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/cubicdaiya/gonp v1.0.4 // indirect
+	github.com/danielgtaylor/huma/v2 v2.38.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/go-chi/chi/v5 v5.3.0 // indirect
@@ -44,6 +45,7 @@ require (
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20260418072757-ce92298d1124 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/pressly/goose/v3 v3.27.1 // indirect
 	github.com/riza-io/grpc-go v0.2.0 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
