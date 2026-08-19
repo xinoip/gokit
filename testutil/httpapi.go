@@ -2,9 +2,11 @@ package testutil
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/humatest"
 	"github.com/stretchr/testify/require"
 
