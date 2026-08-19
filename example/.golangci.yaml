@@ -10,6 +10,9 @@ linters:
     - wsl_v5
     - godox
     - err113
+    - gomodguard
+  enable:
+    - gomodguard_v2
 
   settings:
     gomoddirectives:
