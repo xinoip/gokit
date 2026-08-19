@@ -11,5 +11,8 @@ import (
 var MigrationsFS embed.FS
 
 func runMigrate(ctx context.Context, c *Config) error {
-	return migrate.UpURL(ctx, c.PostgresConnURL, MigrationsFS)
+	return migrate.UpURLPostgres(ctx, migrate.UpURLParams{
+		ConnURL:      c.PostgresConnURL,
+		MigrationsFS: MigrationsFS,
+	})
 }
