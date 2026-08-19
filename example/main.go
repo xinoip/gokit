@@ -44,7 +44,7 @@ func Run() error {
 	case "serve":
 		return serve(ctx, &c)
 	case "migrate":
-		return runMigrate(&c)
+		return runMigrate(ctx, &c)
 	case "openapi":
 		return createOpenAPI()
 	default:

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 
 	"github.com/xinoip/gokit/migrate"
@@ -9,6 +10,6 @@ import (
 //go:embed migrations/*.sql
 var MigrationsFS embed.FS
 
-func runMigrate(c *Config) error {
-	return migrate.UpURL(c.PostgresConnURL, MigrationsFS)
+func runMigrate(ctx context.Context, c *Config) error {
+	return migrate.UpURL(ctx, c.PostgresConnURL, MigrationsFS)
 }
