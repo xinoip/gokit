@@ -16,13 +16,13 @@ func HTTP400(err ...error) error {
 // targeting [huma] library. Error details are logged and not exposed to
 // public.
 func HTTP401(err error) error {
-	slog.Debug("unauthorized", "error", err.Error())
+	slog.Debug("unauthorized", "error", err)
 	return huma.Error401Unauthorized("unauthorized")
 }
 
 // HTTP403 is same as [HTTP401] but for 403 Forbidden.
 func HTTP403(err error) error {
-	slog.Debug("forbidden", "error", err.Error())
+	slog.Debug("forbidden", "error", err)
 	return huma.Error403Forbidden("forbidden")
 }
 
@@ -33,6 +33,6 @@ func HTTP404(err error) error {
 
 // HTTP500 is same as [HTTP401] but for 500 Internal Server Error.
 func HTTP500(err error) error {
-	slog.Error("internal server error", "error", err.Error())
+	slog.Error("internal server error", "error", err)
 	return huma.Error500InternalServerError("internal server error")
 }
