@@ -26,10 +26,7 @@ func (r *RPC) Update(ctx context.Context, p *RPCUpdateParams) (*RPCUpdateResult,
 		return nil, err
 	}
 
-	err = r.cache.SetNote(ctx, note)
-	if err != nil {
-		return nil, err
-	}
+	logCacheError("set updated note", r.cache.SetNote(ctx, note))
 
 	return &RPCUpdateResult{
 		Note: note,

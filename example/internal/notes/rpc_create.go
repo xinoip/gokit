@@ -25,10 +25,7 @@ func (r *RPC) Create(ctx context.Context, p *RPCCreateParams) (*RPCCreateResult,
 		return nil, err
 	}
 
-	err = r.cache.SetNote(ctx, note)
-	if err != nil {
-		return nil, err
-	}
+	logCacheError("set created note", r.cache.SetNote(ctx, note))
 
 	return &RPCCreateResult{
 		Note: note,

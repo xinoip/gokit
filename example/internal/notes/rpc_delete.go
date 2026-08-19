@@ -21,5 +21,7 @@ func (r *RPC) Delete(ctx context.Context, p *RPCDeleteParams) (*struct{}, error)
 		return nil, err
 	}
 
-	return nil, r.cache.DeleteNote(ctx, p.NoteID)
+	logCacheError("delete note", r.cache.DeleteNote(ctx, p.NoteID))
+
+	return &struct{}{}, nil
 }

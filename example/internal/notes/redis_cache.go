@@ -45,7 +45,15 @@ func (c *RedisCache) GetNote(ctx context.Context, noteID uuid.UUID) (*Note, erro
 	var note Note
 	err = json.Unmarshal(data, &note)
 	if err != nil {
-		return nil, fmt.Errorf("unmarshal cached note: %w", err)
+		deleteErr := c.rdb.Del(ctx, cacheKey(noteID)).Err()
+		if deleteErr != nil {
+			return nil, errors.Join(
+				fmt.Errorf("%w: invalid cached note: %w", errCacheMiss, err),
+				fmt.Errorf("delete invalid cached note: %w", deleteErr),
+			)
+		}
+
+		return nil, fmt.Errorf("%w: invalid cached note: %w", errCacheMiss, err)
 	}
 
 	return &note, nil
