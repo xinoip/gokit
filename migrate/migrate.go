@@ -2,7 +2,9 @@
 package migrate
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"io/fs"
 
@@ -10,38 +12,45 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-// Up runs the migrations in the "migrations" directory in given
-// [migrationsFS], using connection [conn].
-func Up(conn *sql.DB, migrationsFS fs.FS) error {
-	goose.SetBaseFS(migrationsFS)
-	err := goose.SetDialect("postgres")
+// Up runs the migrations in the [directory] found in [migrationsFS] using the
+// supplied [context]. It does not take ownership of [conn].
+func Up(ctx context.Context, conn *sql.DB, migrationsFS fs.FS, directory string) error {
+	migrationRoot, err := fs.Sub(migrationsFS, directory)
 	if err != nil {
-		return fmt.Errorf("goose.SetDialect: %w", err)
+		return fmt.Errorf("open migrations directory: %w", err)
 	}
 
-	err = goose.Up(conn, "migrations")
+	provider, err := goose.NewProvider(goose.DialectPostgres, conn, migrationRoot)
 	if err != nil {
-		return fmt.Errorf("goose.Up: %w", err)
+		return fmt.Errorf("create migration provider: %w", err)
+	}
+
+	_, err = provider.Up(ctx)
+	if err != nil {
+		return fmt.Errorf("run migrations: %w", err)
 	}
 
 	return nil
 }
 
-// UpURL opens the connection to the database using [connURL] and runs [Up].
-func UpURL(connURL string, migrationsFS fs.FS) error {
+// UpURL is an opinionated helper that, opens a database connection, runs [Up]
+// agains directory named 'migrations' and closes the connection before
+// returning.
+func UpURL(ctx context.Context, connURL string, migrationsFS fs.FS) (retErr error) {
 	db, err := sql.Open("pgx", connURL)
 	if err != nil {
-		return fmt.Errorf("sql.Open: %w", err)
+		return fmt.Errorf("open database: %w", err)
 	}
+	defer func() {
+		closeErr := db.Close()
+		if closeErr != nil {
+			retErr = errors.Join(retErr, fmt.Errorf("close database: %w", closeErr))
+		}
+	}()
 
-	err = Up(db, migrationsFS)
+	err = Up(ctx, db, migrationsFS, "migrations")
 	if err != nil {
-		return fmt.Errorf("Up: %w", err)
-	}
-
-	err = db.Close()
-	if err != nil {
-		return fmt.Errorf("db.Close: %w", err)
+		return fmt.Errorf("migrate database: %w", err)
 	}
 
 	return nil
