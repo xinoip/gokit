@@ -8,9 +8,7 @@ import (
 )
 
 func ExampleNewChi() {
-	r := mux.NewChi(&mux.NewChiParams{
-		AllowOrigins: []string{"https://app.example.com"},
-	})
+	r := mux.NewChi(mux.DefaultChiConfig("https://app.example.com"))
 	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
