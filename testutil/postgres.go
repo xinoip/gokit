@@ -26,6 +26,16 @@ const (
 // template based, migrations supported, fast Postgres instance.
 func NewPostgres(t *testing.T, migrationsFS fs.FS) *pgx.Conn {
 	t.Helper()
+
+	conn, _ := NewPostgresWithConnURL(t, migrationsFS)
+
+	return conn
+}
+
+// NewPostgresWithConnURL same as [NewPostgres] but returns the connection URL
+// as well.
+func NewPostgresWithConnURL(t *testing.T, migrationsFS fs.FS) (*pgx.Conn, string) {
+	t.Helper()
 	ctx := t.Context()
 
 	dbconf := pgtestdb.Config{
@@ -58,5 +68,5 @@ func NewPostgres(t *testing.T, migrationsFS fs.FS) *pgx.Conn {
 		require.NoError(t, err)
 	})
 
-	return conn
+	return conn, conf.URL()
 }

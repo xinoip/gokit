@@ -1,8 +1,11 @@
 package mux_test
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 
 	"github.com/xinoip/gokit/mux"
 )
@@ -10,10 +13,23 @@ import (
 func ExampleNewChi() {
 	r := mux.NewChi(mux.DefaultChiConfig())
 	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
+		_, err := io.WriteString(w, "healthy")
+		if err != nil {
+			panic(err)
+		}
 	})
-	fmt.Println("health route configured")
+
+	request := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/health", nil)
+	request.Header.Set("Origin", "https://app.example.com")
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, request)
+
+	fmt.Println(response.Code)
+	fmt.Println(response.Header().Get("Access-Control-Allow-Origin"))
+	fmt.Println(response.Body.String())
 
 	// Output:
-	// health route configured
+	// 200
+	// https://app.example.com
+	// healthy
 }
